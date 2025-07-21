@@ -1,0 +1,27 @@
+name: PMD Check
+run-name: ${{ github.actor }} is running pmd check 🚀
+on:
+  pull_request: 
+    branches: [master]
+jobs:
+  pmd-analysis:
+    runs-on: ubuntu-latest
+    steps: 
+    - name: Checkout Code
+      uses: actions/checkout@v2
+    - name: Install JDK and dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget default-jdk unzip
+    - name: Download and install PMD
+      run: |
+        wget https://github.com/pmd/pmd/releases/download/pmd_releases/6.41.0/pmd-bin-6.41.0.zip
+        unzip pmd-bin-6.41.0.zip -d ~ 
+        mv ~/pmd-bin-6.41.0 ~/pmd
+        ~/pmd/bin/run.sh pmd --version
+    - name: Run PMD analysisq
+      run: ~/pmd/bin/run.sh pmd -d force-app -R pmd/ruleset.xml -f text
+    - name: Completely executed
+      run: echo "Success!! - PMD Check Complete"
+      
+
