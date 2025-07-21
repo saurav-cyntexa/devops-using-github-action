@@ -2,7 +2,7 @@ name: PMD Check
 run-name: ${{ github.actor }} is running pmd check 🚀
 on:
   pull_request: 
-    branches: [master]
+    branches: ["master"]
 jobs:
   pmd-analysis:
     runs-on: ubuntu-latest
