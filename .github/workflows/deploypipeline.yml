@@ -35,18 +35,17 @@ jobs:
         # If SFDX_AUTH_URL.txt file is empty or missing, it will return size 0 or 1 so we are checking that here
         run: |
           echo "${{ secrets.SFDX_AUTH_URL }}" > ./SFDX_AUTH_URL.txt
-          secretFileSize=$(wc -c < "./SFDX_AUTH_URL.txt")
+          secretFileSize=$(wc -c < "./SFDX_AUTH_URL.txt" | awk '{print $1}')
         
           if [ "$secretFileSize" -le 1 ]; then
-              echo "Missing SFDX_AUTH_URL secret. Is this workflow running on a fork?"
-              exit 1
+              echo "Missing SFDX_AUTH_URL secret. Is this workflow running on a fork?";
+              exit 1;
           fi
 
       # In this step we are authenticating to the target org using the auth file and giving alias 'neworg'
-      - name: 'Authenticate Acc'
+      - name: 'Authenticate july-org'
         run: ~/sfdx/bin/sfdx auth:sfdxurl:store -f ./SFDX_AUTH_URL.txt -a july-org -d
 
       # Now we are deploying our code from force-app folder to the target org (july org)
       - name: 'Push source code from june-org to july-org'
-        run: |
-          ~/sfdx/bin/sfdx force:source:deploy -u july-org -p force-app/main/default
+        run: ~/sfdx/bin/sfdx force:source:deploy -u july-org -p force-app/main/default
