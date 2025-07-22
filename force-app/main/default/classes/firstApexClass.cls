@@ -1,5 +1,5 @@
 public with sharing class firstApexClass {
-    public firstApexClass() {
-
+    public static void greeting(){
+        System.debug("Hello, I'm learning DevOps");
     }
 }
