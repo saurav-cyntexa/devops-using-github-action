@@ -1,0 +1,52 @@
+name: Deploytojuly@s2labs.com
+run-name: Deploy Changes From june@s2labs.com to july@s2labs.com org
+
+# Controls when this workflow will run
+on:
+  # This workflow will run only when there is a push on the master branch
+  push:
+    branches:
+      - master
+
+# Jobs to be executed
+# We can create multiple jobs but each job should run on a single runner (runner means a virtual machine/environment)
+jobs:
+  deploy-into-july-org:
+    runs-on: ubuntu-latest
+
+    steps:
+      # This step is mandatory one, here we just checkout our source code into the runner machine
+      - name: 'Checkout source code'
+        uses: actions/checkout@v2
+
+      # Installing Salesforce CLI manually by downloading and extracting it
+      - name: 'Install Salesforce CLI'
+        run: |
+          wget https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz
+          mkdir ~/sfdx
+          tar xJf sfdx-linux-x64.tar.xz -C ~/sfdx --strip-components 1
+          echo "$HOME/sfdx/bin" >> $GITHUB_PATH
+          ~/sfdx/bin/sfdx version
+        # I have created a secret from Security -> Actions -> Secrets -> Repository secrets
+
+      # Here we are populating the SFDX_AUTH_URL from secret into a file so that we can use it in next step
+      - name: 'Populate auth file with SFDX_AUTH_URL secret'
+        shell: bash
+        # If SFDX_AUTH_URL.txt file is empty or missing, it will return size 0 or 1 so we are checking that here
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL }}" > ./SFDX_AUTH_URL.txt
+          secretFileSize=$(wc -c < "./SFDX_AUTH_URL.txt")
+        
+          if [ "$secretFileSize" -le 1 ]; then
+              echo "Missing SFDX_AUTH_URL secret. Is this workflow running on a fork?"
+              exit 1
+          fi
+
+      # In this step we are authenticating to the target org using the auth file and giving alias 'neworg'
+      - name: 'Authenticate Acc'
+        run: ~/sfdx/bin/sfdx auth:sfdxurl:store -f ./SFDX_AUTH_URL.txt -a july-org -d
+
+      # Now we are deploying our code from force-app folder to the target org (july org)
+      - name: 'Push source code from june-org to july-org'
+        run: |
+          ~/sfdx/bin/sfdx force:source:deploy -u july-org -p force-app/main/default
