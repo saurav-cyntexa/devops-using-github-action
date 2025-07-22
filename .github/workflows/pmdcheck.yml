@@ -19,7 +19,7 @@ jobs:
         unzip pmd-bin-6.41.0.zip -d ~ 
         mv ~/pmd-bin-6.41.0 ~/pmd
         ~/pmd/bin/run.sh pmd --version
-    - name: Run PMD analysisq
+    - name: Run PMD analysis
       run: ~/pmd/bin/run.sh pmd -d force-app -R pmd/ruleset.xml -f text
     - name: Completely executed
       run: echo "Success!! - PMD Check Complete"
